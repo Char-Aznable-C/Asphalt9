@@ -1,6 +1,6 @@
 "auto";
 
-const profile = require('profile1920.js');
+const profile = require('profile1440.js');
 const carrerCars = profile.carrer.cars;
 const levelName = profile.mp.levelName;
 const status = profile.mp.status;
@@ -15,6 +15,8 @@ var timer = new Date().getTime();
 var lastLevel = 0;
 var lastLevel2 = 5;
 var lastCar   = 0;
+
+var touchDrive = false;
 
 DEVICE.checkPermission();
 
@@ -181,22 +183,22 @@ module.exports = {
                         break;
                     }
                     // error
-             	    case -2: {
-			    toastLog('error');
-	              	    robot.back();
-	                    sleep(1000);                           
-                 	    break;            
+                    case -2: {
+                toastLog('error');
+                          robot.back();
+                        sleep(1000); 
+                         break;
                     } 
                     case 2: {
                         robot.click(profile.mp.multiplayer.x, profile.mp.multiplayer.y);
-                        sleep(1000);
+                        sleep(2000);
                         break;
                         }                    // 游戏主界面
                     case 1: {
                         // 点击多人按钮
                         toast('index');
                         robot.click(profile.mp.multiplayer.x, profile.mp.multiplayer.y);
-                        sleep(4000);
+                        sleep(2000);
                         break;
                     }
                     // 多人开始界面
@@ -315,6 +317,7 @@ module.exports = {
         goingHome() {
             while (1){
                 var mpStatus = mpCheckState();
+                toastLog("mpStatus:" + mpStatus);
                 if (mpStatus == 7) {
                 robot.click(profile.mp.claim.x, profile.mp.claim.y);
                 sleep(2000);
@@ -353,16 +356,17 @@ module.exports = {
                 switch(mpStatus){
                     case 0: {
                         toast('home');
+                        toastLog("x="+profile.mp.homedown.x+"y="+profile.mp.homedown.y);
                         robot.click(profile.mp.homedown.x, profile.mp.homedown.y);
                         sleep(2000);
                         break;
                     }
-                   	// error
-             		case -2: {
-                 		toastLog('error');
-	              	    robot.back();
-	                    sleep(1000);                           
-                 		break;            
+                       // error
+                     case -2: {
+                         toastLog('error');
+                          robot.back();
+                        sleep(1000);                           
+                         break;            
                     } 
 
                     // 单个多人
@@ -416,15 +420,15 @@ module.exports = {
          * 选车
          */
         chooseCar() {        
-	/* 下方多人选车策略多变，所以此处有多个开关以供选择 */
-	// 不用选车直接开始
-	if (0) {
+    /* 下方多人选车策略多变，所以此处有多个开关以供选择 */
+    // 不用选车直接开始
+    if (0) {
             robot.click(profile.mp.start.x, profile.mp.start.y);
             sleep(4000);
             robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
             return true;
         }
-	// 使用上一次的车
+    // 使用上一次的车
         if (0) {
             robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
             sleep(2000);
@@ -436,7 +440,7 @@ module.exports = {
             robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
             return true;
         }    
-	// 常规选车
+    // 常规选车
         if (1) {
             robot.click(profile.mp.start.x, profile.mp.start.y);
             sleep(4000);
@@ -487,7 +491,7 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.mp.width * 4 / 5, profile.mp.height / 2);
+                    robot.click(profile.mp.width * 5 / 6, profile.mp.height / 2);
                     if (left == 5){
                         left = 0;
                         robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
@@ -501,7 +505,7 @@ module.exports = {
             toastLog(++counter_mp + "场无人比赛已完成，平均用时" +parseInt((nowTime - startTime)/1000/counter_mp)+"秒。\n即将开始下一场比赛。");
         }
     },
-    
+
     // CarHunt
     ch:{
         /**
@@ -523,7 +527,7 @@ module.exports = {
                         restart();
                     }
                 }
-                
+
                 switch(chStatus){
                         // error
                     case -2: {
@@ -542,13 +546,13 @@ module.exports = {
                     //  toast('index');                   
                     // 点击每日按钮
                     if (position != 0) {
-                        robot.click(profile.mp.meiri.x, profile.mp.meiri.y);
+                        robot.click(profile.ch.daily.x, profile.ch.daily.y);
                     }
                     else {
                     // 点击特殊按钮
-                        robot.click(profile.mp.teshu.x, profile.mp.teshu.y);
+                        robot.click(profile.ch.special.x, profile.ch.special.y);
                     }
-                    sleep(1000);
+                    sleep(2000);
                     break;
                     }
                         // 每日开始界面
@@ -558,11 +562,12 @@ module.exports = {
                         // 每日寻车
                         if (position != 0) {
                             // 寻车赛事按钮位置
-                            var CarHuntX = 255 + 280 * position;
-                            var CarHuntY = 1015;
+                            var CarHuntX = profile.ch.firstEvent.x + profile.ch.interval * position;
+                            var CarHuntY = profile.ch.firstEvent.y;
+                            //toastLog("click"+CarHuntX+" "+CarHuntY+" "+profile.ch.firstEvent.x+" "+profile.ch.interval+" "+position);
                             robot.click(CarHuntX, CarHuntY);
                         //   toast('start');
-                            sleep(1000);
+                            sleep(2000);
                             break;
                         }
                         // 特殊寻车
@@ -622,14 +627,24 @@ module.exports = {
         
         chooseCar(up) {
             robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+            sleep(4000);
+            toastLog("up="+up);
+            
+            
+            if (up) {
+                toastLog(profile.ch.lastCarUp.x+","+profile.ch.lastCarUp.y);
+                robot.click(profile.ch.lastCarUp.x, profile.ch.lastCarUp.y);
+            } else {
+                toastLog(profile.ch.lastCarDown.x+","+profile.ch.lastCarDown.y);
+                robot.click(profile.ch.lastCarDown.x, profile.ch.lastCarDown.y);
+            }
             sleep(2000);
-            if (up)
-                robot.click(1100, 450);
-            else
-                robot.click(1100, 850);
-            sleep(2000);
+            checkTouchDrive();
+            
+            
             robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
-            return true;
+            return checkFuel();
+            //return true;
         },
         
         /**
@@ -659,9 +674,40 @@ module.exports = {
             }
             toastLog(++counter_mp + "场寻车比赛已完成，即将开始下一场比赛。");
         }
+    }    
 }
-    
+
+/**
+ * 检查是否开启自动挡
+ */
+function checkTouchDrive() {
+    if (!touchDrive) {
+        var point = profile.ch.touchDriveOn;
+        var img = captureScreen();
+        // 配置了才检查
+        if (profile.ch.touchDriveOn != undefined && !compareColor(img, profile.ch.touchDriveOn)) {
+            robot.click(profile.ch.touchDriveOn.x, profile.ch.touchDriveOn.y);
+            sleep(2000)
+        }
+        
+        // 无论是否配置都置为true
+        touchDrive = true;
+    }    
 }
+
+/**
+ * 检查是否有油（是否出现补油界面）
+ */
+function checkFuel() {
+    // 配置了才检查
+    var img = captureScreen();
+    if (profile.ch.refuel != undefined && compareColor(img, profile.ch.refuel)) {
+        robot.click(profile.ch.refuel.x, profile.ch.refuel.y);
+        return false;
+    }
+    return true;
+}
+
 /**
  * 控制完成一个段位的选车
  * @param {string} level 段位
@@ -718,6 +764,15 @@ function hasFuel(level) {
             };
             break;
         }
+        
+        case 'bronze2': {
+            cars = carPick.bronze2;
+            levelPoint = {
+                x : profile.mp.bronze.x,
+                y : profile.mp.bronze.y
+            };
+            break;
+        }
 
         default: {
             cars = [4, 3, 2, 1];
@@ -730,11 +785,18 @@ function hasFuel(level) {
     }
     robot.click(levelPoint.x, levelPoint.y);
     sleep(2000);
-    toastLog('开始扫描' + level + '段位车辆');
-    carFuel = scanFuel(cars);
-    // log(carFuel);
-    toastLog(level + '段位车辆扫描完成');
-    var theCar = compareFuel(cars, carFuel);
+    var theCar = -1;
+    // 只配置一辆车默认无限油模式
+    if (cars.length == 1) {
+        theCar = cars[0]
+    } else {
+        toastLog('开始扫描' + level + '段位车辆');
+        carFuel = scanFuel(cars);
+        toastLog("选车数组：" + cars + "， 总数：" + cars.length);
+        toastLog("车油数组：" + carFuel + "总数：" + carFuel.length);
+        toastLog(level + '段位车辆扫描完成');
+        theCar = compareFuel(cars, carFuel);
+    }
     if(theCar == -1) {
         toastLog(level + '段位车辆全部无油');
         return false;
@@ -827,19 +889,32 @@ function compareFuel(cars, carFuel) {
 function judgeThisScreenFuel(n) {
     var carPoint = {
         x: profile.mp.firstCar.x + profile.mp.distance.x * parseInt((n - 1) / 2),
+        y: profile.mp.firstCar.y + profile.mp.distance.y * ((n - 1) % 2),
+        name: profile.mp.firstCar.name + "_" + n,
+        colors: profile.mp.firstCar.colors,
+        isDebug: profile.mp.firstCar.isDebug
+    }
+    
+    var img = captureScreen();
+    return compareColor(img, carPoint);
+}
+/* function judgeThisScreenFuel(n) {
+    var carPoint = {
+        x: profile.mp.firstCar.x + profile.mp.distance.x * parseInt((n - 1) / 2),
         y: profile.mp.firstCar.y + profile.mp.distance.y * ((n - 1) % 2)
     }
-    // toastLog(carPoint.x + "," + carPoint.y);
+    toastLog("car num: " + n)
+    toastLog(carPoint.x + "," + carPoint.y);
     var img = captureScreen();
     var carcheckState = images.pixel(img, carPoint.x, carPoint.y);
-    // toastLog(colors.toString(carcheckState));
-
+    toastLog(colors.toString(carcheckState));
+    
     if (colors.equals(carcheckState, "#ffc3fb13")) {
         return true;
     } else {
         return false;
     }
-}
+} */
 
 /**
  * 向左滑动指定列数
@@ -857,7 +932,7 @@ function horizontalSwipe(swipes) {
  * 生涯状态机
  */
 function carrerCheckState() {
-    var img = captureScreen();
+    /* var img = captureScreen();
     
     var token = images.pixel(img, profile.carrer.token.x, profile.carrer.token.y);
     var isToken = colors.equals(token, "#0090ff");
@@ -883,13 +958,14 @@ function carrerCheckState() {
     // 5 结算
     if (isGoldenPoint && !isRecommendedPoints)
         return 5;
-    /*
-    toastLog("goldenPoint is " + colors.toString(goldenPoint));
-    toastLog("token is " + colors.toString(token));
-    toastLog("credit is " + colors.toString(credit));
-    toastLog("recommendedPoints is " + colors.toString(recommendedPoints));
-    */
-    return -1;
+    
+    if (0) {}
+        toastLog("goldenPoint is " + colors.toString(goldenPoint));
+        toastLog("token is " + colors.toString(token));
+        toastLog("credit is " + colors.toString(credit));
+        toastLog("recommendedPoints is " + colors.toString(recommendedPoints));
+    }  
+    return -1; */
 }
 
 /**
@@ -901,67 +977,37 @@ function mpCheckState() {
     var img = captureScreen();
     
     // 代币
-    var token = images.pixel(img, profile.mp.token.x, profile.mp.token.y);
-    var isToken = colors.equals(token, "#0090ff") || colors.equals(token, "#0492fa") || colors.equals(token, "#0392fb") || colors.equals(token, "#0291fd")  || colors.equals(token, "#0391fc");
+    var isToken = compareColor(img, profile.mp.token);
 
     // 积分
-    var credit = images.pixel(img, profile.mp.credit.x, profile.mp.credit.y);
-    var isCredit = colors.equals(credit, "#ffc600");
+    var isCredit = compareColor(img, profile.mp.credit);
     
     // 多人开始按钮
-    var start = images.pixel(img, profile.mp.start.x, profile.mp.start.y);
-    var isStart = colors.equals(start, "#c3fb12");
+    var isStart = compareColor(img, profile.mp.start);
 
     // 继续按钮
-    var next = images.pixel(img, profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
-    var isNext = colors.equals(next, "#c3fb12");
+    var isNext = compareColor(img, profile.mp.goldenPoint);
 
     // 多人按钮
-    var duoren = images.pixel(img, profile.mp.multiplayer.x, profile.mp.multiplayer.y);
-    var isDuoren = colors.equals(duoren, "#ffffff");
+    var isDuoren = compareColor(img, profile.mp.multiplayer);
 
     // 返回按钮
-    var back = images.pixel(img, profile.mp.back.x, profile.mp.back.y);
-    var backward = images.pixel(img, profile.mp.backward.x, profile.mp.backward.y);
-    var isBack = (colors.equals(back, "#fffffe") || colors.equals(back, "#ffffff")) && colors.equals(backward, "#010101");
-		
-	// 领取5-10-20
-    var claim1 = images.pixel(img, profile.mp.mpackage1.x, profile.mp.mpackage1.y);
-    var claim2 = images.pixel(img, profile.mp.mpackage2.x, profile.mp.mpackage2.y);
-    var isClaim = colors.equals(claim1, "#fa154f") && colors.equals(claim2, "#fa154f");
+    var isBack = compareColor(img, profile.mp.back) && compareColor(img, profile.mp.backward);
+        
+    // 领取5-10-20
+    var isClaim = compareColor(img, profile.mp.mpackage1) && compareColor(img, profile.mp.mpackage2);
 
-	// 多人选取
-    var homeup = images.pixel(img, profile.mp.homeup.x, profile.mp.homeup.y);
-    var isHomeup = colors.equals(homeup, "#ffffff");
-    var homedown = images.pixel(img, profile.mp.homedown.x, profile.mp.homedown.y);
-    var isHomedown = colors.equals(homedown, "#ffffff");
+    // 多人选取
+    var isHomeup = compareColor(img, profile.mp.homeup);
+    var isHomedown = compareColor(img, profile.mp.homedown);
 
-	// 各种出错
-    var errorleft = images.pixel(img, profile.mp.errorleft.x, profile.mp.errorleft.y);
-    var errorright = images.pixel(img, profile.mp.errorright.x, profile.mp.errorright.y);
-    var iserror = colors.equals(errorleft, "#1c5ab2") && colors.equals(errorright, "#1c5ab2");
+    // 各种出错
+    var iserror = compareColor(img, profile.mp.errorleft) && compareColor(img, profile.mp.errorright);
 
-if (false) {
-    var ds="";
-    if (isToken)
-        ds += "代币1.";
-    if (isCredit)
-        ds += "积分.";
-    if (isStart)
-        ds += "开始.";
-    if (isNext)
-        ds += "继续.";
-    if (isToken)
-        ds +="多人";
-    else
-        ds += colors.toString(token);
-
-    toastLog(ds);
-  }
         
     // -2 error
     if (iserror)
-	    state = -2;
+        state = -2;
     // 0 Home
     else if (isToken && isCredit && !isBack && !isStart && !isClaim && isHomedown && isHomeup)
         state = 0;
@@ -969,7 +1015,7 @@ if (false) {
     else if (isToken && isCredit && !isBack && !isDuoren && !isStart && !isClaim)
         state = 1;
     // 2 单个多人
-    else if (isToken && isCredit && isDuoren && !isBack)
+    else if (isToken && isCredit && isDuoren && !isBack && !isClaim)
         state = 2;
     // 3 多人开始
     else if (isToken && isCredit && isBack && isStart)
@@ -980,6 +1026,27 @@ if (false) {
     // 7 5/10/20奖杯包
     else if (isToken && isCredit && isClaim)
         state = 7;
+    
+    if (1) {
+        var ds="";
+        if (isToken)
+            ds += "代币1.";
+        if (isCredit)
+            ds += "积分.";
+        if (isStart)
+            ds += "开始.";
+        if (isBack)
+            ds += "回退.";
+        if (isNext)
+            ds += "继续.";
+        if (isDuoren)
+            ds +="多人";
+        else
+            ds +="default";
+
+        toastLog(ds);
+        toastLog("mp return state: " + state);
+    }
     
     return state;
 }
@@ -993,81 +1060,104 @@ function chCheckState() {
     var img = captureScreen();
     
     // 代币
-    var token = images.pixel(img, profile.mp.token.x, profile.mp.token.y);
-    var isToken = colors.equals(token, "#0090ff") || colors.equals(token, "#0492fa") || colors.equals(token, "#0392fb") || colors.equals(token, "#0291fd");
+    var isToken = compareColor(img, profile.mp.token);
     
     // 积分
-    var credit = images.pixel(img, profile.mp.credit.x, profile.mp.credit.y);
-    var isCredit = colors.equals(credit, "#ffc600");
+    var isCredit = compareColor(img, profile.mp.credit);
     
-    // 买票➕
-    var everyday_duoren = images.pixel(img, 1817, 161);
-    var everyday_teshu = images.pixel(img, 1817, 184);
-    var isEveryday = colors.equals(everyday_duoren, "#c3fb12") || colors.equals(everyday_teshu, "#c3fb12") ;
-
-    // 寻车赛事按钮位置
-    var CarHuntX = 1320;
-    var CarHuntY = 1015;
-    var CarHunt = images.pixel(img, CarHuntX, CarHuntY);
-    var isCarHunt = colors.equals(CarHunt, "#c3fb12");
+    // 每日赛事买票的➕号
+    var hasPlus = compareColor(img, profile.ch.plusLeft) && compareColor(img, profile.ch.plusRight);
 
     // 寻车开始按钮
-    var next = images.pixel(img, profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
-    var isNext = colors.equals(next, "#c3fb12");
+    var isNext = compareColor(img, profile.mp.goldenPoint);
 
     // 每日按钮
-    var meiri = images.pixel(img, profile.mp.meiri.x, profile.mp.meiri.y);
-    var isMeiri = colors.equals(meiri, "#ffffff");
+    var isDaily = compareColor(img, profile.ch.daily);
 
     // 特殊按钮
-    var teshu = images.pixel(img, profile.mp.teshu.x, profile.mp.teshu.y);
-    var isTeshu = colors.equals(teshu, "#ffffff");
+    var isSpecial = compareColor(img, profile.ch.special);
     
     // 返回按钮
-    var back = images.pixel(img, profile.mp.back.x, profile.mp.back.y);
-    var backward = images.pixel(img, profile.mp.backward.x, profile.mp.backward.y);
-    var isBack = (colors.equals(back, "#fffffe") || colors.equals(back, "#ffffff")) && colors.equals(backward, "#010101");
+    var isBack = compareColor(img, profile.mp.back) && compareColor(img, profile.mp.backward);
     
     // 各种出错
-    var errorleft = images.pixel(img, profile.mp.errorleft.x, profile.mp.errorleft.y);
-    var errorright = images.pixel(img, profile.mp.errorright.x, profile.mp.errorright.y);
-    var iserror = colors.equals(errorleft, "#1c5ab2") && colors.equals(errorright, "#1c5ab2");
+    var iserror = compareColor(img, profile.mp.errorleft) && compareColor(img, profile.mp.errorright);
     
-     if (0) {
-     var ds="";
-     if (isCredit)
-     ds += "Cre";
-     if (isToken)
-     ds += "Tok";
-     if (isBack)
-     ds += "Back";
-     if (isNext)
-     ds += "next";
-     if (isEveryday)
-     ds += "everyday";
-     else
-     ds += colors.toString(everyday_duoren);
-     
-     toastLog(ds);
-     }
-     
-    // 2 error
+     // 2 error
     if (iserror)
         state = -2;
     // 1 主页
-    else if (isToken && isCredit && !isBack && !isEveryday && !isNext)
+    else if (isToken && isCredit && !isBack && !hasPlus && !isNext)
         state = 1;
     // 2 特别赛事
-    else if (isToken && isCredit && !isEveryday && isTeshu && isBack)
-        state = 2;
+    //else if (isToken && isCredit && !hasPlus && isSpecial && isBack)
+    //    state = 2;
     // 3 每日开始
-    else if (isToken && isCredit && isBack && isEveryday && !isNext)
+    else if (isToken && isCredit && isBack && hasPlus)
         state = 3;
     // 5 寻车开始
     else if (isToken && isCredit && isBack && isNext)
-        state = 5;
+        state = 5; 
+    
+    if (0) {
+        var ds="";
+        if (isCredit)
+        ds += "Cre";
+        if (isToken)
+        ds += "Tok";
+        if (isBack)
+        ds += "Back";
+        if (isNext)
+        ds += "next";
+        if (hasPlus)
+        ds += "hasPlus";
+        else
+        ds += "default";
+
+        toastLog(ds);
+        toastLog("ch return state: " + state);
+    } 
 
     return state;
+}
+
+/**
+ * 比较颜色
+ * @param {img} img 抓取的图片
+ * @param {object} point 待比较的点
+ */
+function compareColor(img, point) {
+    var isDebug = false;
+    if (point.isDebug != undefined && point.isDebug != false) {
+        isDebug = true;
+    }
+        
+    if (isDebug) {
+        log("compare point color, point is " + JSON.stringify(point));
+    }    
+    
+    var p = images.pixel(img, point.x, point.y);
+    
+    
+    var result;
+    var color;
+    for (let i = 0; i < point.colors.length; i++) {
+        color = point.colors[i];
+        if (isDebug) {
+            log("current color is " + color);
+        }
+        result = colors.equals(p, color);
+        if (result) {
+            break;
+        }
+    }
+    
+    if (isDebug) {
+        log("compare result is " + result);
+        log("the actual color is " + colors.toString(p));
+    }
+    
+    return result;
 }
 
 /**

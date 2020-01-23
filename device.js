@@ -42,7 +42,8 @@ module.exports = {
      * 调节亮度及音量，进入低功耗模式
      */
     savePower : () => {
-        log("save power");
+        toastLog("save power");
+        device.setBrightnessMode(targetBrightness);
         device.setBrightness(targetBrightness);
         device.setMusicVolume(targetMediaVolume);
     },
