@@ -26,7 +26,7 @@ var mpStatus = [
 var mpCarPick = {
     legend: [1, 2, 3, 4, 6],
     platinum: [1, 2, 3, 4, 5, 6, 7, 9, 10, 14],
-    gold: [1, 2, 3, 4, 5, 6],
+    gold: [3, 4, 5, 6, 9, 11],
     silver: [5, 6],
     bronze: [5, 6, 7, 8, 9, 10, 11, 12],
 
@@ -41,22 +41,106 @@ var mpCarPick = {
 const robot = require('robot.js');
 
 module.exports = {
+    // 运行配置
+    run: {
+        // 多人上配置
+        mp: {
+            // 是否启用
+            enable: 1,
+            // 调试模式
+            isDebug: 0
+        },
+
+        // 多人下配置
+        mp2: {
+            // 是否启用
+            enable: false,
+            // 是否启用前置寻车
+            preEnable: false,
+            // 单次任务循环次数
+            loopCount: 10,
+            // mp2任务间隔，单位为分钟，此处为每60分钟进入下面多人
+            mp2interval: 60
+        },
+
+        // 寻车配置
+        ch: {
+            // 是否启用
+            enable: 1,
+            // 是否启用前置寻车
+            preEnable: 1,
+            // 寻车按钮在每日赛事中的位置，从0开始计数，0=特别赛事寻车
+            position: 0,
+            // 寻车任务间隔，单位为分钟，此处为每120分钟进入寻车
+            interval: 120,
+            // 单次任务循环次数
+            loopCount: 6,
+            // 选取上次用车上面/下面
+            // 由于寻车赛事一般都是2票跑一次，所以每次寻车会运行5次，请选择能够自动拿到奖励，并且是5个油的车，
+            // 在运行脚本之前请确认：1、最后一次寻车用的必须是这辆车，2、此车满油。3、如果该车在下方，请选择up=0
+            up: 1,
+            // 调试模式
+            isDebug: 0
+        },
+
+        chSp: {
+            // 特殊赛组数，即相邻两天任务间隔像素较多视为不同组
+            group: 2,
+            // 特殊赛任务，即每组中的序号
+            // 以国服布加迪赛事为例day5 GTR寻车为例：spGroup=2,spMission=2
+            mission: 3,
+            // 起始定位到day1任务所需左移次数
+            preSwipe: 6,
+            // 第一个任务x轴坐标，最好在中心点，后面滑动偏差容错较高
+            firstMissionX: 700,
+            // 每组赛事滑动像素
+            groupDistance: [1256],
+            // 每组中的相邻赛事间隔
+            distance: 389
+        },
+    },
+
+    // 通用属性
+    common: {
+        // 分辨率宽度
+        width : 2340,
+                
+        // 分辨率高度
+        height : 1080,
+
+        // 最上方代币图标=#0090ff蓝色，会有色差
+        token: { x: 1240, y: 54, name: "token", colors: ["#ff0190fe", "#0090ff", "#0492fa", "#0392fb", "#0291fd"], isDebug: false},
+        
+        // 最上方积分图标=#ffc600||#ffc500黄色
+        credit: { x: 1550, y: 55, name: "credit", colors: ["#ffc600"]},
+
+        // 返回按钮=#ffffff白色
+        back: { x: 25, y: 25, name: "back", colors: ["#fffffe", "#ffffff"], isDebug: false},
+        // 返回按钮里的<尖端=#010101黑色
+        backward: { x: 112, y: 53, name: "backward", colors: ["#010101", "#ff000000"], isDebug: false},
+
+        // 生涯,开始,继续
+        goldenPoint: { x: 1900, y: 1000, name: "goldenPoint", colors: ["#c3fb12", "#ffc3fb11"], isDebug: false},
+
+        // 出错窗口左下角=#1c5ab2蓝色
+        errorleft: { x: 276, y: 816, name: "errorleft", colors: ["#1c5ab2"]},
+        // 出错窗口右下角=#1c5ab2蓝色
+        errorright: { x: 2065, y:816, name: "errorright", colors: ["#1c5ab2"]},
+
+        // 补油界面右上角X中心白色
+        refillFuel: { x: 1826, y: 274, name: "refuel", colors: ["#ffff0054"], isDebug: false},
+
+        // 补票界面右上角X中心白色
+        refillTicket: { x: 1995, y: 205, name: "refuel", colors: ["#ffff0054"], isDebug: false},
+
+        // 自动挡开的绿色背景
+        touchDriveOn: {x: 2170, y: 818, name: "touchDriveOn", colors: ["#c3fb12"]}
+    },
+
     // 生涯
     carrer: {
         // 生涯用车
         cars : carrerCars,
-    
-        // 分辨率宽度
-        width : 2340,
-        
-        // 分辨率高度
-        height : 1080,
-    
-        // 最上方代币图标
-        token: { x: 921 , y: 42 },
-    
-        // 最上方积分图标
-        credit: { x: 1206 , y: 42 },
     
         // 生涯,开始,继续
         goldenPoint: { x: 1500, y: 1000 },
@@ -96,35 +180,13 @@ module.exports = {
         // 下方多人>尖端=#ffffff，多人赛事调整时y会有变化
         homedown: {x: 1842, y: 615, name: "homedown", colors: ["#ffffff"], isDebug: false},
  //       homedown: {x: 1842, y: 896 },
-        
-        // 出错窗口左下角=#1c5ab2蓝色
-        errorleft: { x: 276, y: 816, name: "errorleft", colors: ["#1c5ab2"]},
-        // 出错窗口右下角=#1c5ab2蓝色
-        errorright: { x: 2065, y:816, name: "errorright", colors: ["#1c5ab2"]},
-        
+                
         // 多人数据
         levelName : mpLevelName,
 
         status : mpStatus,
 
         carPick : mpCarPick,
-
-        // 分辨率宽度
-        width : 2340,
-        
-        // 分辨率高度
-        height : 1080,
-
-        // 最上方代币图标=#0090ff蓝色，会有色差
-        token: { x: 1240, y: 54, name: "token", colors: ["#ff0190fe", "#0090ff", "#0492fa", "#0392fb", "#0291fd"], isDebug: false},
-        
-        // 最上方积分图标=#ffc600||#ffc500黄色
-        credit: { x: 1550, y: 55, name: "credit", colors: ["#ffc600"]},
-        
-        // 返回按钮=#ffffff白色
-        back: { x: 25, y: 25, name: "back", colors: ["#fffffe", "#ffffff"], isDebug: false},
-        // 返回按钮里的<尖端=#010101黑色
-        backward: { x: 112, y: 53, name: "backward", colors: ["#010101", "#ff000000"], isDebug: false},
 
         // 多人游戏按钮
         multiplayer: { x: 1152, y: 1000, name: "multiplayer", colors: ["#ffffff"]},
@@ -153,10 +215,6 @@ module.exports = {
         // 传奇
         legend: { x: 2140, y: 250 },
 
-        // 生涯,开始,继续
-        goldenPoint: { x: 1900, y: 1000, name: "goldenPoint", colors: ["#c3fb12", "#ffc3fb11"], isDebug: false},
-        
-
         // 第一辆车, 颜色为有油的#ffc3fb13绿色
         firstCar: { x: 735, y: 625, name: "car", colors: ["#ffc3fb12", "#ffc3fb13"], isDebug: false},
 
@@ -172,22 +230,32 @@ module.exports = {
     ch: {
         // 每日赛事按钮
         daily: { x: 600, y: 1000, name: "daily", colors: ["#ffffff"]},
-        // 特殊赛事按钮
-        special: { x: 300, y: 1000, name: "special", colors: ["#ffffff"]},
+
         // 买票➕横线
         plusLeft: {x: 2205, y: 215, name: "plusLeft", colors: ["#c3fb12"], isDebug: false},
         plusRight: {x: 2225, y: 215, name: "plusRight", colors: ["#c3fb12"], isDebug: false},
-        // 自动挡开的绿色背景
-        touchDriveOn: {x: 2170, y: 818, name: "touchDriveOn", colors: ["#c3fb12"]},
-        // 补油界面右上角X中心白色
-        //refuel: { x: 1826, y: 274, name: "refuel", colors: ["#ffff0054"], isDebug: false},
+
         // 第一个赛事位置
         firstEvent: {x: 255, y: 1015},
+
         // 2个赛事的间隔距离
         interval: 281,
+
         // 车库上一次选车上车坐标
         lastCarUp: {x: 1100, y: 450},
+
         // 车库上一次选车下车坐标
         lastCarDown: {x: 1100, y: 850}
+    },
+
+    // 特殊赛事寻车
+    chSp: {
+        // 特殊赛事按钮
+        special: { x: 300, y: 1000, name: "special", colors: ["#ffffff"]},
+       
+        // 买票➕横线
+        plusLeft: {x: 2080, y: 215, name: "plusLeft", colors: ["#c3fb12"], isDebug: false},
+        plusRight: {x: 2100, y: 215, name: "plusRight", colors: ["#c3fb12"], isDebug: false},
+
     }
 }

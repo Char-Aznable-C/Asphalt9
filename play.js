@@ -1,6 +1,6 @@
 "auto";
 
-const profile = require('profile1440.js');
+const profile = require('profile2340-cn.js');
 const carrerCars = profile.carrer.cars;
 const levelName = profile.mp.levelName;
 const status = profile.mp.status;
@@ -263,7 +263,7 @@ module.exports = {
                 //toastLog("lastCar = " + lastCar + "lastLevel = " + lastLevel );
                 // 找到有油的车
                 sleep(4000);
-                robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+                robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
                 toastLog('Loading')
                 return true;
             }
@@ -296,12 +296,12 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.mp.width * 4 / 5, profile.mp.height / 2);
+                    robot.click(profile.common.width * 4 / 5, profile.common.height / 2);
                     if (left == 5){
                         left = 0;
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                         sleep(400);
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                     }
                     sleep(950);
                     // toastLog("isNext ?= " + checkState());
@@ -425,19 +425,19 @@ module.exports = {
     if (0) {
             robot.click(profile.mp.start.x, profile.mp.start.y);
             sleep(4000);
-            robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+            robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
             return true;
         }
     // 使用上一次的车
         if (0) {
-            robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+            robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
             sleep(2000);
             if (up)
                 robot.click(1100, 450);
             else
                 robot.click(1100, 850);
             sleep(2000);
-            robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+            robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
             return true;
         }    
     // 常规选车
@@ -458,7 +458,7 @@ module.exports = {
             if (FOUND){
                 // 找到有油的车
                 sleep(4000);
-                robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+                robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
                 return true;
             }
             else {
@@ -491,12 +491,12 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.mp.width * 5 / 6, profile.mp.height / 2);
+                    robot.click(profile.common.width * 5 / 6, profile.common.height / 2);
                     if (left == 5){
                         left = 0;
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                         sleep(400);
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                     }
                     sleep(950);
                     // toastLog("isNext ?= " + checkState());
@@ -542,22 +542,46 @@ module.exports = {
     
                         // 游戏主界面
                     case 1: 
-                    case 2: {
-                    //  toast('index');                   
-                    // 点击每日按钮
-                    if (position != 0) {
-                        robot.click(profile.ch.daily.x, profile.ch.daily.y);
-                    }
-                    else {
-                    // 点击特殊按钮
-                        robot.click(profile.ch.special.x, profile.ch.special.y);
-                    }
+                        toast('index');                   
+                        //点击每日按钮
+                        if (position != 0) {
+                            robot.click(profile.ch.daily.x, profile.ch.daily.y);
+                        }
+                        else {
+                        // 点击特殊按钮
+                            robot.click(profile.chSp.special.x, profile.chSp.special.y);
+                        }
+                        sleep(1000);
+                        break
+                    case 2: {                    
+                        toastLog('special');
+                        y = profile.common.height / 2;
+                        // 右移到达第一个任务
+                        for(let j = 0; j < profile.run.chSp.preSwipe; j++) {
+                            toastLog("右移1次");
+                            robot.swipe(550, y, 1800, y, 700);
+                            sleep(1000);
+                        }
+                        
+                        swipes = profile;
+            
+                        // 左移507像素
+                        for(let j = 0; j < profile.run.chSp.group - 1; j++) {
+                            toastLog("左移1次");
+                            robot.swipe(1800, y, 1800 - profile.run.chSp.groupDistance[j], y, 700);
+                            sleep(1000);
+                        }
+                        
+                        
+                        robot.click(profile.run.chSp.firstMissionX + profile.run.chSp.distance * (profile.run.chSp.mission - 1), y);
+                        sleep(1000);
+                        break;
                     sleep(2000);
                     break;
                     }
                         // 每日开始界面
                     case 3: 
-                        toastLog('teshu');
+                        toastLog('dayly');
                     
                         // 每日寻车
                         if (position != 0) {
@@ -572,32 +596,7 @@ module.exports = {
                         }
                         // 特殊寻车
                         else {
-                            swipes = 5;
-                            // 右移377像素
-                            for(let j = 0; j < swipes; j++) {
-                                let dur = 700;
-                                let slp = 2000;
-                                sleep(slp);
-                                toast("有意1次");
-                                robot.swipe(800, 480, 1500, 480, dur);
-                                sleep(slp);
-                            }
-                            
-                            swipes = 3;
-                
-                            // 左移507像素
-                            for(let j = 0; j < swipes; j++) {
-                                let dur = 700;
-                                let slp = 2000;
-                                sleep(slp);
-                                toast("作揖1次");
-                                robot.swipe(1104, 480, 472, 480, dur);
-                                sleep(slp);
-                            }
-                            
-                            robot.click(profile.mp.width / 2, profile.mp.height / 2);
-                            sleep(1000);
-                            break;
+                           
                         }    
                         // 寻车开始界面
                     case 5: {
@@ -626,7 +625,7 @@ module.exports = {
          */
         
         chooseCar(up) {
-            robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
+            robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
             sleep(4000);
             toastLog("up="+up);
             
@@ -642,8 +641,8 @@ module.exports = {
             checkTouchDrive();
             
             
-            robot.click(profile.mp.goldenPoint.x, profile.mp.goldenPoint.y);
-            return checkFuel();
+            robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
+            return checkFuel() && checkTicket();
             //return true;
         },
         
@@ -661,12 +660,12 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.mp.width * 4 / 5, profile.mp.height / 2);
+                    robot.click(profile.common.width * 4 / 5, profile.common.height / 2);
                     if (left == 5){
                         left = 0;
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                         sleep(400);
-                        robot.click(profile.mp.width * 3 / 10, profile.mp.height / 2);
+                        robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
                     }
                     sleep(950);
                     // toastLog("isNext ?= " + checkState());
@@ -682,11 +681,11 @@ module.exports = {
  */
 function checkTouchDrive() {
     if (!touchDrive) {
-        var point = profile.ch.touchDriveOn;
+        var point = profile.common.touchDriveOn;
         var img = captureScreen();
         // 配置了才检查
-        if (profile.ch.touchDriveOn != undefined && !compareColor(img, profile.ch.touchDriveOn)) {
-            robot.click(profile.ch.touchDriveOn.x, profile.ch.touchDriveOn.y);
+        if (profile.common.touchDriveOn != undefined && !compareColor(img, profile.common.touchDriveOn)) {
+            robot.click(profile.common.touchDriveOn.x, profile.common.touchDriveOn.y);
             sleep(2000)
         }
         
@@ -701,8 +700,23 @@ function checkTouchDrive() {
 function checkFuel() {
     // 配置了才检查
     var img = captureScreen();
-    if (profile.ch.refuel != undefined && compareColor(img, profile.ch.refuel)) {
-        robot.click(profile.ch.refuel.x, profile.ch.refuel.y);
+    if (profile.common.refillFuel != undefined && compareColor(img, profile.common.refillFuel)) {
+        toastLog("无油退出");
+        robot.click(profile.common.refillFuel.x, profile.common.refillFuel.y);
+        return false;
+    }
+    return true;
+}
+
+/**
+ * 检查是否有票（是否出现补票界面）
+ */
+function checkTicket() {
+    // 配置了才检查
+    var img = captureScreen();
+    if (profile.common.refillTicket != undefined && compareColor(img, profile.common.refillTicket)) {
+        toastLog("无票退出");
+        robot.click(profile.common.refillTicket.x, profile.common.refillTicket.y);
         return false;
     }
     return true;
@@ -977,22 +991,22 @@ function mpCheckState() {
     var img = captureScreen();
     
     // 代币
-    var isToken = compareColor(img, profile.mp.token);
+    var isToken = compareColor(img, profile.common.token);
 
     // 积分
-    var isCredit = compareColor(img, profile.mp.credit);
+    var isCredit = compareColor(img, profile.common.credit);
     
     // 多人开始按钮
     var isStart = compareColor(img, profile.mp.start);
 
     // 继续按钮
-    var isNext = compareColor(img, profile.mp.goldenPoint);
+    var isNext = compareColor(img, profile.common.goldenPoint);
 
     // 多人按钮
     var isDuoren = compareColor(img, profile.mp.multiplayer);
 
     // 返回按钮
-    var isBack = compareColor(img, profile.mp.back) && compareColor(img, profile.mp.backward);
+    var isBack = compareColor(img, profile.common.back) && compareColor(img, profile.common.backward);
         
     // 领取5-10-20
     var isClaim = compareColor(img, profile.mp.mpackage1) && compareColor(img, profile.mp.mpackage2);
@@ -1002,7 +1016,7 @@ function mpCheckState() {
     var isHomedown = compareColor(img, profile.mp.homedown);
 
     // 各种出错
-    var iserror = compareColor(img, profile.mp.errorleft) && compareColor(img, profile.mp.errorright);
+    var iserror = compareColor(img, profile.common.errorleft) && compareColor(img, profile.common.errorright);
 
         
     // -2 error
@@ -1027,7 +1041,7 @@ function mpCheckState() {
     else if (isClaim)
         state = 7;
     
-    if (1) {
+    if (profile.run.mp.isDebug) {
         var ds="";
         if (isToken)
             ds += "代币1.";
@@ -1060,28 +1074,28 @@ function chCheckState() {
     var img = captureScreen();
     
     // 代币
-    var isToken = compareColor(img, profile.mp.token);
+    var isToken = compareColor(img, profile.common.token);
     
     // 积分
-    var isCredit = compareColor(img, profile.mp.credit);
+    var isCredit = compareColor(img, profile.common.credit);
     
     // 每日赛事买票的➕号
     var hasPlus = compareColor(img, profile.ch.plusLeft) && compareColor(img, profile.ch.plusRight);
 
     // 寻车开始按钮
-    var isNext = compareColor(img, profile.mp.goldenPoint);
+    var isNext = compareColor(img, profile.common.goldenPoint);
 
     // 每日按钮
     var isDaily = compareColor(img, profile.ch.daily);
 
     // 特殊按钮
-    var isSpecial = compareColor(img, profile.ch.special);
+    var isSpecial = compareColor(img, profile.chSp.plusLeft) && compareColor(img, profile.chSp.plusRight);
     
     // 返回按钮
-    var isBack = compareColor(img, profile.mp.back) && compareColor(img, profile.mp.backward);
+    var isBack = compareColor(img, profile.common.back) && compareColor(img, profile.common.backward);
     
     // 各种出错
-    var iserror = compareColor(img, profile.mp.errorleft) && compareColor(img, profile.mp.errorright);
+    var iserror = compareColor(img, profile.common.errorleft) && compareColor(img, profile.common.errorright);
     
      // 2 error
     if (iserror)
@@ -1090,8 +1104,8 @@ function chCheckState() {
     else if (isToken && isCredit && !isBack && !hasPlus && !isNext)
         state = 1;
     // 2 特别赛事
-    //else if (isToken && isCredit && !hasPlus && isSpecial && isBack)
-    //    state = 2;
+    else if (isToken && isCredit && !hasPlus && isSpecial && isBack)
+       state = 2;
     // 3 每日开始
     else if (isToken && isCredit && isBack && hasPlus)
         state = 3;
@@ -1099,7 +1113,7 @@ function chCheckState() {
     else if (isToken && isCredit && isBack && isNext)
         state = 5; 
     
-    if (0) {
+    if (profile.run.ch.isDebug) {
         var ds="";
         if (isCredit)
         ds += "Cre";
