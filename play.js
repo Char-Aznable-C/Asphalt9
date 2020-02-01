@@ -1,6 +1,6 @@
 "auto";
 
-const profile = require('profile2340-cn.js');
+const profile = require('profile1440.js');
 const carrerCars = profile.carrer.cars;
 const levelName = profile.mp.levelName;
 const status = profile.mp.status;
@@ -21,6 +21,7 @@ var touchDrive = false;
 DEVICE.checkPermission();
 
 module.exports = {
+    profile: profile,
     // 生涯
     carrer: {
         /**
@@ -137,7 +138,7 @@ module.exports = {
                 }
                 // 若未跑完,则点击氮气
                 else {
-                    robot.click(profile.carrer.width * 4 / 5, profile.carrer.height / 2);
+                    robot.click(profile.carrer.width * 5 / 6, profile.carrer.height / 2);
                     sleep(1000);
                     // toastLog("isNext ?= " + checkState());
                 }
@@ -296,7 +297,7 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.common.width * 4 / 5, profile.common.height / 2);
+                    robot.click(profile.common.width * 5 / 6, profile.common.height / 2);
                     if (left == 5){
                         left = 0;
                         robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
@@ -640,8 +641,8 @@ module.exports = {
             sleep(2000);
             checkTouchDrive();
             
-            
             robot.click(profile.common.goldenPoint.x, profile.common.goldenPoint.y);
+            sleep(2000);
             return checkFuel() && checkTicket();
             //return true;
         },
@@ -660,7 +661,7 @@ module.exports = {
                 }
                 // 若未跑完仍可点击氮气
                 else {
-                    robot.click(profile.common.width * 4 / 5, profile.common.height / 2);
+                    robot.click(profile.common.width * 5 / 6, profile.common.height / 2);
                     if (left == 5){
                         left = 0;
                         robot.click(profile.common.width * 3 / 10, profile.common.height / 2);
@@ -806,8 +807,6 @@ function hasFuel(level) {
     } else {
         toastLog('开始扫描' + level + '段位车辆');
         carFuel = scanFuel(cars);
-        toastLog("选车数组：" + cars + "， 总数：" + cars.length);
-        toastLog("车油数组：" + carFuel + "总数：" + carFuel.length);
         toastLog(level + '段位车辆扫描完成');
         theCar = compareFuel(cars, carFuel);
     }
@@ -816,68 +815,77 @@ function hasFuel(level) {
         return false;
     } else {
         toastLog('\n' + level + '段位第' + theCar + '号车辆有油\n正在选取该车');
-        lastCar = theCar;
+        lastCar = theCar;;
         robot.click(levelPoint.x, levelPoint.y);
         sleep(2000)
-        horizontalSwipe( parseInt( (theCar-1) / 2 ) );
-        robot.click(profile.mp.firstCar.x, profile.mp.firstCar.y + parseInt( (theCar - 1) % 2 ) * profile.mp.distance.y);
+        if (theCar > 6) {
+            horizontalSwipe(parseInt((theCar - 5) / 2));
+            robot.click(profile.mp.firstCar.x + 2 * profile.mp.distance.x,
+                profile.mp.firstCar.y + parseInt( (theCar - 1) % 2 ) * profile.mp.distance.y);
+        } else {
+            robot.click(profile.mp.firstCar.x + parseInt((theCar - 1) / 2) * profile.mp.distance.x, 
+                profile.mp.firstCar.y + parseInt( (theCar - 1) % 2 ) * profile.mp.distance.y);
+        }
         return true;
     }
 }
 
 /**
  * 扫描用户所选的车辆
+ * 首先根据最大数算出需要滑动三列的次数及起始滑动单列次数，
+ * 整页（3列）滑动前先滑动单列，保证在最大数大于6时最后一辆车扫描时在最后一列
  * @param {array} cars 用户自定义的选车数组
  */
-function scanFuel(cars) {
-
+function scanFuel(cars) {    
     // 最靠后的车辆
     var maxCar = cars.reduce((a, b) => {
         return a > b ? a : b
     });
-    var maxSwipes = parseInt( (maxCar-1) / 2 );
-    // log('maxSwipes ' + maxSwipes)
     // 最靠前的车辆序号
     minCar = cars.reduce((a, b) => {
         return a < b ? a : b
     });
-    var minSwipes = parseInt( (minCar-1) / 2 );
-    // log('minSwipes ' + minSwipes)
-    // 有几次整个屏幕（三列）
-    var threeCol = parseInt( (maxSwipes - minSwipes + 1) / 3 );
-    // log('3col ' + threeCol)
-    // 有几个单列
-    var oneCol = (maxSwipes - minSwipes + 1) % 3;
-    // log('1col ' + oneCol)
+
+    // 有几次移动整个屏幕（三列），前三列不需要移动，第四第五列仅需移动单列即可
+    var totalThreeCol = parseInt((maxCar - 5) / 6);
+    //toastLog("totalThreeCol:" + totalThreeCol);
+    // 整页滑动前滑动单列数
+    var preSingleCol = maxCar > 6 ? parseInt(((maxCar + 1) / 2) % 3) : 0;
+    //toastLog("preSingleCol:" + preSingleCol);
+    // 是否跳过单列滑动再扫描油量
+    var skipSingleCol = minCar > preSingleCol * 2;
+    //toastLog("skipSingleCol:" + skipSingleCol);
+    // 扫描前跳过的页数
+    var skipThreeCol = skipSingleCol ? 0 : parseInt((minCar - preSingleCol * 2 - 1) / 6)
+    //toastLog("skipThreeCol:" + skipThreeCol);
+
     // 建立油量数组
     var carFuel = new Array(maxCar);
 
-    // 先滑动最小的次数
-    // toast('滑动最小次数');
-    horizontalSwipe(minSwipes);
-    // 记录扫描进度
-    var carNum = 2 * minSwipes;
-    // 扫描三列
-    for (let i = 0; i < threeCol; i++) {
-        sleep(2000)
-        for (let j = 1; j <= 6; j++) {
-            carFuel[carNum + j] = judgeThisScreenFuel(j);
-        }
-        // toast('滑动3列')
+    // 不跳过单列移动
+    if (!skipSingleCol) {
+        judgeThisScreenFuel(0, carFuel);
+    }
+
+    // 滑动跳过单列偏移
+    horizontalSwipe(preSingleCol);
+    // 滑动跳过的页
+    for (let i = 0; i < skipThreeCol; i++) {
         horizontalSwipe(3);
-        carNum += 6;
     }
-    // 扫描单列
-    for (let i = 0; i < oneCol; i++) {
-        sleep(2000)
-        for (let j = 1; j <= 2; j++) {
-            carFuel[carNum + j] = judgeThisScreenFuel(j);
-        }
-        // toast('滑动1列')
-        horizontalSwipe(1);
-        carNum += 2;
+
+    // 扫描前跳过的列数
+    var offsetCols = preSingleCol + 3 * skipThreeCol;
+
+    judgeThisScreenFuel(offsetCols, carFuel);
+    // 扫描三列
+    for (let i = 0; i < totalThreeCol - skipThreeCol; i++) {
+        horizontalSwipe(3);
+        judgeThisScreenFuel(offsetCols + 3 * (i + 1), carFuel);
     }
-    // log('Fuel(scanfuel)\n' + carFuel);
+    
+    //toastLog("选车数组：" + cars + "， 总数：" + cars.length);
+    //toastLog("车油数组：" + carFuel + "总数：" + carFuel.length);
     // 返回油量表
     return carFuel;
 }
@@ -897,20 +905,26 @@ function compareFuel(cars, carFuel) {
 }
 
 /**
- * 判断屏幕中具体车辆有油与否
- * @param {number} n 车辆编号
+ * 判断屏幕中当前页中的车辆有油与否
+ * @param {number} nCol 偏移列数
+ * @param {carFuel} carFuel 油量数组
  */
-function judgeThisScreenFuel(n) {
-    var carPoint = {
-        x: profile.mp.firstCar.x + profile.mp.distance.x * parseInt((n - 1) / 2),
-        y: profile.mp.firstCar.y + profile.mp.distance.y * ((n - 1) % 2),
-        name: profile.mp.firstCar.name + "_" + n,
-        colors: profile.mp.firstCar.colors,
-        isDebug: profile.mp.firstCar.isDebug
-    }
-    
+function judgeThisScreenFuel(nCol, carFuel) {
     var img = captureScreen();
-    return compareColor(img, carPoint);
+
+    for (let i = 1; i < 7; i++) {
+        n = 2 * nCol + i
+        var carPoint = {
+            x: profile.mp.firstCar.x + profile.mp.distance.x * parseInt((i - 1) / 2),
+            y: profile.mp.firstCar.y + profile.mp.distance.y * ((i - 1) % 2),
+            name: profile.mp.firstCar.name + "_" + n,
+            colors: profile.mp.firstCar.colors,
+            isDebug: profile.mp.firstCar.isDebug
+        }
+        //toastLog("n = " + n);
+        carFuel[n] = compareColor(img, carPoint);
+        //toastLog("carFule = " + carFuel);
+    }
 }
 /* function judgeThisScreenFuel(n) {
     var carPoint = {
@@ -938,7 +952,7 @@ function horizontalSwipe(swipes) {
     for(let i = 0; i < swipes; i++) {
         // toast("作揖1次");
         robot.swipe(profile.mp.swipeStart.x, profile.mp.swipeStart.y, profile.mp.swipeEnd.x, profile.mp.swipeEnd.y, 700);
-        sleep(2000);
+        sleep(1000);
     }
 }
 
@@ -1160,7 +1174,11 @@ function compareColor(img, point) {
         if (isDebug) {
             log("current color is " + color);
         }
-        result = colors.equals(p, color);
+        if (point.accurate != undefined && point.accurate != false) {
+            result = colors.equals(p, color);
+        } else {
+            result = colors.isSimilar(p, color);
+        }
         if (result) {
             break;
         }

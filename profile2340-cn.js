@@ -45,10 +45,10 @@ module.exports = {
     run: {
         // 多人上配置
         mp: {
-            // 是否启用
+            // 是否启用,启用：1/true，不启用：0/false，下同
             enable: 1,
             // 调试模式
-            isDebug: 0
+            isDebug: 1
         },
 
         // 多人下配置
@@ -90,7 +90,7 @@ module.exports = {
             // 以国服布加迪赛事为例day5 GTR寻车为例：spGroup=2,spMission=2
             mission: 3,
             // 起始定位到day1任务所需左移次数
-            preSwipe: 6,
+            preSwipe: 7,
             // 第一个任务x轴坐标，最好在中心点，后面滑动偏差容错较高
             firstMissionX: 700,
             // 每组赛事滑动像素
@@ -122,6 +122,7 @@ module.exports = {
         // 生涯,开始,继续
         goldenPoint: { x: 1900, y: 1000, name: "goldenPoint", colors: ["#c3fb12", "#ffc3fb11"], isDebug: false},
 
+        // error
         // 出错窗口左下角=#1c5ab2蓝色
         errorleft: { x: 276, y: 816, name: "errorleft", colors: ["#1c5ab2"]},
         // 出错窗口右下角=#1c5ab2蓝色
@@ -176,10 +177,8 @@ module.exports = {
     mp: {
         // 上方多人>尖端=#ffffff白色，多人赛事调整时y会有变化
         homeup: { x: 1841, y: 279, name: "homeup", colors: ["#ffffff"], isDebug: false},
-//        homeup: { x: 1841, y: 226 },
         // 下方多人>尖端=#ffffff，多人赛事调整时y会有变化
         homedown: {x: 1842, y: 615, name: "homedown", colors: ["#ffffff"], isDebug: false},
- //       homedown: {x: 1842, y: 896 },
                 
         // 多人数据
         levelName : mpLevelName,
@@ -256,6 +255,5 @@ module.exports = {
         // 买票➕横线
         plusLeft: {x: 2080, y: 215, name: "plusLeft", colors: ["#c3fb12"], isDebug: false},
         plusRight: {x: 2100, y: 215, name: "plusRight", colors: ["#c3fb12"], isDebug: false},
-
     }
-}
+};

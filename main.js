@@ -1,5 +1,5 @@
 
-const profile = require('profile2340-cn.js');
+const profile = require('play.js').profile;
 const DEVICE = require('device.js');
 const PLAY = require('play.js').mp;
 const PLAY2 = require('play.js').mp2;
